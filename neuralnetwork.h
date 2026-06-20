@@ -75,6 +75,7 @@ layers - array containing the layers of the network.
 weightMatrixes - array containing the weight matrices between layers
 layerCount - number of actual layers in the network
 layerCapacityCount - number of layers allocated in the network (will grow as needed)
+learningRate - learning rate of the neural network.
 lossFunction - type of loss function used in the network
  
 **/
@@ -83,6 +84,7 @@ typedef struct NeuralNetwork{
     WeightMatrix* weightMatrices;
     size_t layerCount;
     size_t layerCapacityCount;
+    float learningRate;
     LossFunction lossFunction;
 } NeuralNetwork;
 
@@ -136,3 +138,14 @@ Checks the number of layers and number of layers allocated in the neural network
 
 **/
 void checkNetworkStatus(NeuralNetwork* neuralNetwork);
+
+
+
+/**
+
+Trains the neural network on the target output data.
+
+@return Pointer to the neural network.
+
+**/
+NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, size_t epochs, float learningRate);
