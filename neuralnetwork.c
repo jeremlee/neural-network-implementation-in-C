@@ -17,6 +17,7 @@ NeuralNetwork* initialize(size_t neuronCount, LossFunction lossFunction){
     neuralnetwork->layers[0].values = (float*)malloc(neuronCount*sizeof(float));
     neuralnetwork->layers[0].biases = NULL; //input layer does not have biases
     neuralnetwork->layers[0].delta = NULL; //not applicable to input layer also
+    neuralnetwork->history = NULL;
     neuralnetwork->layers[0].activationFunction = NONE; //not applicable also
     neuralnetwork->lossFunction = lossFunction;
     neuralnetwork->weightMatrices = (WeightMatrix*)malloc((neuralnetwork->layerCapacityCount-1)*sizeof(WeightMatrix));
@@ -125,26 +126,64 @@ NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, 
                     for(size_t i=0;i<outputLayerSize;i++){
                         //actual - target
                         switch(neuralNetwork->layers[neuralNetwork->layerCount-1].activationFunction){
-                        case RELU:
-                            //delta = (a - y) * (a > 0)
-                            neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (forwardPassResults[i] > 0);
-                            break;
-                        case SIGMOID:
-                            //delta = (a - y) * a * (1 - a)
-                            neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * forwardPassResults[i] * (1 - forwardPassResults[i]);
-                            break;
-                        case TANH:
-                            //delta = (a - y) * (1 - a^2)
-                            neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (1 - forwardPassResults[i] * forwardPassResults[i]);
-                            break;
-                        case NONE:
-                        break;
+                            case RELU:
+                                //delta = (a - y) * (a > 0)
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (forwardPassResults[i] > 0);
+                                break;
+                            case SIGMOID:
+                                //delta = (a - y) * a * (1 - a)
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * forwardPassResults[i] * (1 - forwardPassResults[i]);
+                                break;
+                            case TANH:
+                                //delta = (a - y) * (1 - a^2)
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                break;
+                            case NONE:
+                                break;
                         }
                     }
                     break;
                 case BINARY_CROSS_ENTROPY:
+                    for(size_t i=0;i<outputLayerSize;i++){
+                        //actual - target
+                        switch(neuralNetwork->layers[neuralNetwork->layerCount-1].activationFunction){
+                            case RELU:
+                                /// delta = ((a - y) / (a > 0 ? 1 : 0))
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) / (forwardPassResults[i] > 0);
+                                break;
+                            case SIGMOID:
+                                // delta = (a - y) 
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]);
+                                break;
+                            case TANH:
+                                // delta = ((a - y) / (1 - a*a))
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) / (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                break;
+                            case NONE:
+                                break;
+                        }
+                    }
                     break;
                 case CATEGORICAL_CROSS_ENTROPY:
+                    for(size_t i=0;i<outputLayerSize;i++){
+                        //actual - target
+                        switch(neuralNetwork->layers[neuralNetwork->layerCount-1].activationFunction){
+                            case RELU:
+                                // delta = (a - y) * (a > 0 ? 1 : 0)
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (forwardPassResults[i] > 0);
+                                break;
+                            case SIGMOID:
+                                // delta = (a - y) * a * (1 - a)
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * forwardPassResults[i] * (1-forwardPassResults[i]);
+                                break;
+                            case TANH:
+                                // delta = (a - y) * (1 - a * a)
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                break;
+                            case NONE:
+                                break;
+                        }
+                    }
                     break;
                 default:
                     break;

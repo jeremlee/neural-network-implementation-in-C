@@ -51,6 +51,22 @@ typedef struct Layer{
 } Layer;
 
 
+
+/**
+
+Represents an epoch.
+
+loss - loss value of the network in the epoch
+accuracy - accuracy of the network in the epoch
+
+
+**/
+typedef struct Epoch{
+    float loss;
+    float accuracy;
+} Epoch;
+
+
 /**
 
 Represents a weight matrix connecting a layer to another.
@@ -77,7 +93,8 @@ layerCount - number of actual layers in the network
 layerCapacityCount - number of layers allocated in the network (will grow as needed)
 learningRate - learning rate of the neural network.
 lossFunction - type of loss function used in the network
- 
+history - array of epochs containing data like loss and accuracy during the training
+
 **/
 typedef struct NeuralNetwork{
     Layer* layers;
@@ -86,6 +103,7 @@ typedef struct NeuralNetwork{
     size_t layerCapacityCount;
     float learningRate;
     LossFunction lossFunction;
+    Epoch* history;
 } NeuralNetwork;
 
 /**
