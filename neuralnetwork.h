@@ -101,6 +101,7 @@ typedef struct NeuralNetwork{
     WeightMatrix* weightMatrices;
     size_t layerCount;
     size_t layerCapacityCount;
+    size_t epochCount;
     float learningRate;
     LossFunction lossFunction;
     Epoch* history;
@@ -152,7 +153,7 @@ float* computeOutput(NeuralNetwork* neuralNetwork, float* input);
 
 Checks the number of layers and number of layers allocated in the neural network.
 
-@return Pointer to the output layer values.
+@return nothing
 
 **/
 void checkNetworkStatus(NeuralNetwork* neuralNetwork);
@@ -167,3 +168,14 @@ Trains the neural network on the target output data.
 
 **/
 NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, size_t epochs, float learningRate);
+
+
+
+/**
+
+Shows the history of the neural network's training
+
+@return nothing
+
+**/
+void showHistory(NeuralNetwork* neuralNetwork);

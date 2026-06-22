@@ -1,4 +1,6 @@
 #define _USE_MATH_DEFINES
+#define GRADIENT_CLIP 5.0f
+
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -11,6 +13,7 @@ NeuralNetwork* initialize(size_t neuronCount, LossFunction lossFunction){
     NeuralNetwork* neuralnetwork = (NeuralNetwork*)malloc(sizeof(NeuralNetwork));   
     neuralnetwork->layerCount = 1;
     neuralnetwork->layerCapacityCount = 5;
+    neuralnetwork->epochCount = 0;
     neuralnetwork->learningRate = 0.0; //initial value of learning rate
     neuralnetwork->layers = (Layer*)malloc(neuralnetwork->layerCapacityCount*sizeof(Layer));
     neuralnetwork->layers[0].neuronCount = neuronCount;
@@ -112,31 +115,45 @@ void checkNetworkStatus(NeuralNetwork* neuralNetwork){
 }
 
 NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, size_t epochs, float learningRate){
+    neuralNetwork->history = (Epoch*)malloc(epochs*sizeof(Epoch));
+    neuralNetwork->epochCount = epochs;
     size_t outputLayerSize = neuralNetwork->layers[neuralNetwork->layerCount-1].neuronCount;
     float* forwardPassResults;
-    float errors[outputLayerSize];
     float sum = 0;
+    float loss = 0;
+    float epochLoss;
+    float reluZeroDivCheck, tanhZeroDivCheck, result;
     size_t rowCount, colCount;
     for(size_t epoch=0;epoch<epochs;epoch++){
         //forward pass
         forwardPassResults = computeOutput(neuralNetwork, input); //actual output
-
+        epochLoss = 0;
         switch(neuralNetwork->lossFunction){ // calculate delta values of output layer
                 case MSE:
                     for(size_t i=0;i<outputLayerSize;i++){
-                        //actual - target
+                        loss = (forwardPassResults[i] - target[i]);
+                        epochLoss+=powf(loss,2);
                         switch(neuralNetwork->layers[neuralNetwork->layerCount-1].activationFunction){
                             case RELU:
                                 //delta = (a - y) * (a > 0)
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (forwardPassResults[i] > 0);
+                                result = loss * (forwardPassResults[i] > 0);
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case SIGMOID:
                                 //delta = (a - y) * a * (1 - a)
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * forwardPassResults[i] * (1 - forwardPassResults[i]);
+                                result = loss * forwardPassResults[i] * (1 - forwardPassResults[i]);
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case TANH:
                                 //delta = (a - y) * (1 - a^2)
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                result = loss * (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case NONE:
                                 break;
@@ -145,19 +162,33 @@ NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, 
                     break;
                 case BINARY_CROSS_ENTROPY:
                     for(size_t i=0;i<outputLayerSize;i++){
-                        //actual - target
+                        loss = (forwardPassResults[i] - target[i]);
+                        //loss_i = -[y log(a) + (1 - y) log(1 - a)]
+                        epochLoss+= -((target[i] * logf(forwardPassResults[i] == 0 ? 0.000001f : forwardPassResults[i])) + ((1-target[i]) * logf((1-forwardPassResults[i]) == 0 ? 0.000001f : (1-forwardPassResults[i]))));
                         switch(neuralNetwork->layers[neuralNetwork->layerCount-1].activationFunction){
                             case RELU:
                                 /// delta = ((a - y) / (a > 0 ? 1 : 0))
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) / (forwardPassResults[i] > 0);
+                                reluZeroDivCheck = forwardPassResults[i] > 0 ? 1 : 0.000001f;
+                                result = loss / reluZeroDivCheck;
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case SIGMOID:
                                 // delta = (a - y) 
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]);
+                                loss = forwardPassResults[i] - target[i];
+                                result = loss;
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case TANH:
                                 // delta = ((a - y) / (1 - a*a))
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) / (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                tanhZeroDivCheck = (1-forwardPassResults[i]*forwardPassResults[i]) == 0 ? 0.000001f : (1-forwardPassResults[i]*forwardPassResults[i]);
+                                result = loss / tanhZeroDivCheck;
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case NONE:
                                 break;
@@ -166,19 +197,29 @@ NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, 
                     break;
                 case CATEGORICAL_CROSS_ENTROPY:
                     for(size_t i=0;i<outputLayerSize;i++){
-                        //actual - target
+                        loss = (forwardPassResults[i] - target[i]);
+                        epochLoss++;
                         switch(neuralNetwork->layers[neuralNetwork->layerCount-1].activationFunction){
                             case RELU:
                                 // delta = (a - y) * (a > 0 ? 1 : 0)
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (forwardPassResults[i] > 0);
+                                result = loss * (forwardPassResults[i] > 0);
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case SIGMOID:
                                 // delta = (a - y) * a * (1 - a)
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * forwardPassResults[i] * (1-forwardPassResults[i]);
+                                result = loss * forwardPassResults[i] * (1-forwardPassResults[i]);
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case TANH:
                                 // delta = (a - y) * (1 - a * a)
-                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = (forwardPassResults[i] - target[i]) * (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                result = loss * (1 - forwardPassResults[i] * forwardPassResults[i]);
+                                if (result > GRADIENT_CLIP) result = GRADIENT_CLIP;
+                                if (result < -GRADIENT_CLIP) result = -GRADIENT_CLIP;
+                                neuralNetwork->layers[neuralNetwork->layerCount-1].delta[i] = result;
                                 break;
                             case NONE:
                                 break;
@@ -190,7 +231,7 @@ NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, 
             }
 
         // DELTA loop for previous layers
-        for(int i=neuralNetwork->layerCount-2;i>0;i--){ // for each layer going backward (back propagation)
+        for(int i=(int)neuralNetwork->layerCount-2;i>0;i--){ // for each layer going backward (back propagation)
             rowCount = neuralNetwork->layers[i].neuronCount;
             colCount = neuralNetwork->layers[i+1].neuronCount;
             for(size_t j=0;j<neuralNetwork->layers[i].neuronCount;j++){ // for each neuron in the current layer
@@ -225,7 +266,7 @@ NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, 
       
 
         // WEIGHT UPDATE LOOP
-        for(int currentLayer=neuralNetwork->layerCount-1;currentLayer>0;currentLayer--){ // for each layer
+        for(int currentLayer=(int)neuralNetwork->layerCount-1;currentLayer>0;currentLayer--){ // for each layer
             rowCount = neuralNetwork->layers[currentLayer-1].neuronCount;
             colCount = neuralNetwork->layers[currentLayer].neuronCount;
             for(size_t i=0;i<rowCount;i++){
@@ -245,9 +286,19 @@ NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, 
         }
 
 
+            epochLoss/=neuralNetwork->layers[neuralNetwork->layerCount-1].neuronCount;
+            neuralNetwork->history[epoch].loss = epochLoss;
 
+            printf("Epoch: %zu/%zu\tLoss: %.4f\n", epoch+1, epochs, epochLoss);
     } // end of epoch
 
 
     return neuralNetwork;
+}
+
+void showHistory(NeuralNetwork* neuralNetwork){
+    for(size_t i=0;i<neuralNetwork->epochCount;i++){
+        printf("Epoch: %zu/%zu\tLoss: %.4f\n", i+1, neuralNetwork->epochCount, neuralNetwork->history[i].loss);
+    }
+    return;
 }
