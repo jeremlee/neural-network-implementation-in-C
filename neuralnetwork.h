@@ -179,3 +179,16 @@ Shows the history of the neural network's training
 
 **/
 void showHistory(NeuralNetwork* neuralNetwork);
+
+
+
+/**
+
+Shows the history of the neural network's training
+
+@param row Number of rows in the matrix
+@param col Number of columns in the matrix
+@return Float pointer of flattened array
+
+**/
+float* flattenMatrix(size_t row, size_t col, float train[row][col]);

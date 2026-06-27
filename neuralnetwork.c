@@ -114,6 +114,24 @@ void checkNetworkStatus(NeuralNetwork* neuralNetwork){
     return;
 }
 
+
+
+float* flattenMatrix(size_t row, size_t col, float train[row][col]){
+    if(row == 1){
+        return train[0];
+    }
+    float* flattenedArray = (float*)malloc(row*col*sizeof(float));
+    for(size_t i=0;i<row;i++){
+        for(size_t j=0;j<col;j++){
+            flattenedArray[i*col+j] = train[i][j];
+        }
+    }
+    return flattenedArray;
+
+}
+
+
+
 NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, size_t epochs, float learningRate){
     neuralNetwork->history = (Epoch*)malloc(epochs*sizeof(Epoch));
     neuralNetwork->epochCount = epochs;
