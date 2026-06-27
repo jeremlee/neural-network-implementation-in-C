@@ -69,6 +69,7 @@ typedef struct Epoch{
 typedef struct Dataset{
     size_t row;
     size_t col;
+    size_t targetCol;
     float* input;
     float* target;
 } Dataset;
@@ -174,7 +175,7 @@ Trains the neural network on the target output data.
 @return Pointer to the neural network.
 
 **/
-NeuralNetwork* train(NeuralNetwork* neuralNetwork, float* input, float* target, size_t epochs, float learningRate);
+NeuralNetwork* train(NeuralNetwork* neuralNetwork, Dataset* dataset, size_t epochs, float learningRate);
 
 
 
@@ -191,11 +192,13 @@ void showHistory(NeuralNetwork* neuralNetwork);
 
 /**
 
-Shows the history of the neural network's training
+Creates a dataset
 
 @param row Number of rows in the matrix
 @param col Number of columns in the matrix
-@return Float pointer of flattened array
+@param input The inputs of the dataset
+@param target The desired outputs
+@return Newly created dataset pointer
 
 **/
-float* flattenMatrix(size_t row, size_t col, float train[row][col]);
+Dataset* createDataset(size_t row, size_t col, size_t targetCol, float input[row][col], float target[row][targetCol]);
