@@ -66,6 +66,13 @@ typedef struct Epoch{
     float accuracy;
 } Epoch;
 
+typedef struct Dataset{
+    size_t row;
+    size_t col;
+    float* input;
+    float* target;
+} Dataset;
+
 
 /**
 
