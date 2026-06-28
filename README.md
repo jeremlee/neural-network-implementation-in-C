@@ -41,6 +41,46 @@ nn = addLayer(nn, 2, SIGMOID); //output layer with 2 neurons
 float input[] = {1, 0, 1, 0};
 
 float* output = computeOutput(nn, input);
+// simulate XOR
+float train_input[16][4] = {
+    {1, 1, 1, 1},
+    {1, 1, 1, 0},
+    {1, 1, 0, 1},
+    {1, 1, 0, 0},
+    {1, 0, 1, 1},
+    {1, 0, 1, 0},
+    {1, 0, 0, 1},
+    {1, 0, 0, 0},
+    {0, 1, 1, 1},
+    {0, 1, 1, 0},
+    {0, 1, 0, 1},
+    {0, 1, 0, 0},
+    {0, 0, 1, 1},
+    {0, 0, 1, 0},
+    {0, 0, 0, 1},
+    {0, 0, 0, 0}
+};
+float target_data[16][1] = {
+    {0}, // {1, 1, 1, 1} -> 4 ones (even)
+    {1}, // {1, 1, 1, 0} -> 3 ones (odd)
+    {1}, // {1, 1, 0, 1} -> 3 ones (odd)
+    {0}, // {1, 1, 0, 0} -> 2 ones (even)
+    {1}, // {1, 0, 1, 1} -> 3 ones (odd)
+    {0}, // {1, 0, 1, 0} -> 2 ones (even)
+    {0}, // {1, 0, 0, 1} -> 2 ones (even)
+    {1}, // {1, 0, 0, 0} -> 1 one  (odd)
+    {1}, // {0, 1, 1, 1} -> 3 ones (odd)
+    {0}, // {0, 1, 1, 0} -> 2 ones (even)
+    {0}, // {0, 1, 0, 1} -> 2 ones (even)
+    {1}, // {0, 1, 0, 0} -> 1 one  (odd)
+    {0}, // {0, 0, 1, 1} -> 2 ones (even)
+    {1}, // {0, 0, 1, 0} -> 1 one  (odd)
+    {1}, // {0, 0, 0, 1} -> 1 one  (odd)
+    {0}  // {0, 0, 0, 0} -> 0 ones (even)
+};
+Dataset* dataset = createDataset(16, 4, 1, train_input, target_data);
+nn = train(nn,dataset,676767,0.005f);
+//showHistory(nn);
 ```
 
 ## Building
