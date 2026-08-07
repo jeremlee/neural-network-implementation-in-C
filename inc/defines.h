@@ -3,8 +3,12 @@
 
 #define _USE_MATH_DEFINES
 
-#ifndef GRADIENT_CLIP
 #define GRADIENT_CLIP 5.0f
-#endif
+
+#define BIAS_MIN_VAL -0.001
+#define BIAS_MAX_VAL 0.001
+
+
+
 
 #endif

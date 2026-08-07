@@ -53,7 +53,7 @@ int main(){
         {0}  // {0, 0, 0, 0} -> 0 ones (even)
     };
     Dataset* dataset = createDataset(16, 4, 1, train_input, target_data);
-    nn = train(nn,dataset,676767,0.005f);
+    nn = train(nn,dataset,676,0.05f);
     //showHistory(nn);
 
     return 0;
