@@ -124,4 +124,8 @@ Creates a dataset
 Dataset* createDataset(size_t row, size_t col, size_t targetCol, float input[row][col], float target[row][targetCol]);
 
 
+void handleTrainingLossMSE(NeuralNetwork* neuralNetwork, size_t* datasetRow, float* epochLoss, Dataset* dataset, float* forwardPassResults);
+void handleTrainingLossBCE(NeuralNetwork* neuralNetwork, size_t* datasetRow, float* epochLoss, Dataset* dataset, float* forwardPassResults);
+
+
 #endif
