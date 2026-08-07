@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-#include"neuralnetwork.h"
+#include"neural_network.h"
 int main(){
     srand(42);
     printf("Forward pass test\n");

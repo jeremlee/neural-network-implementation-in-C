@@ -1,15 +1,12 @@
-#define _USE_MATH_DEFINES
-#define GRADIENT_CLIP 5.0f
-
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
 #include<string.h>
-#include "neuralnetwork.h"
+#include"neural_network.h"
+#include"defines.h"
 
-NeuralNetwork* initialize(size_t neuronCount, LossFunction lossFunction){
+NeuralNetwork* initialize(size_t neuronCount, ENUM_LOSS_FUNCTION lossFunction){
     NeuralNetwork* neuralnetwork = (NeuralNetwork*)malloc(sizeof(NeuralNetwork));   
     neuralnetwork->layerCount = 1;
     neuralnetwork->layerCapacityCount = 5;
@@ -27,7 +24,7 @@ NeuralNetwork* initialize(size_t neuronCount, LossFunction lossFunction){
     return neuralnetwork;
 }
 
-NeuralNetwork* addLayer(NeuralNetwork* neuralNetwork, size_t neuronCount, ActivationFunction activationFunction){
+NeuralNetwork* addLayer(NeuralNetwork* neuralNetwork, size_t neuronCount, ENUM_ACTIVATION_FUNCTION activationFunction){
     if(!neuralNetwork){
         printf("Neural network is uninitialized!");
         exit(EXIT_FAILURE);

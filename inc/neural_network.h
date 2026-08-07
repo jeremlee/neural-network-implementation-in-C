@@ -1,94 +1,14 @@
+#ifndef _NEURAL_NETWORK_H_
+#define _NEURAL_NETWORK_H_
+
+
 #include<stddef.h>
-
-
-/**
-
-Activation functions supported currently
- 
-**/
-typedef enum{
-    RELU,
-    SIGMOID,
-    TANH,
-    NONE
-} ActivationFunction;
-
-
-/**
-
-Loss functions supported currently
-
-MSE - Mean Squared Error (typically used for regression)
-BINARY CROSS ENTROPY - used for binary classification
-CATEGORICAL CROSS ENTROPY - used for multi-class classification
- 
-**/
-typedef enum{
-    MSE,
-    BINARY_CROSS_ENTROPY,
-    CATEGORICAL_CROSS_ENTROPY
-} LossFunction;
-
-
-/**
-
-Represents a layer within the neural network.
-
-biases - value of biases of each neuron 
-values - actual value of the neurons in the layer
-delta - error signal of the neuron (to be used in backpropagation)
-neuronCount - number of neurons in the layer
-activationFunction - type of activation function used in the layer
-
-
-**/
-typedef struct Layer{
-    float* biases;
-    float* values;
-    float* delta;
-    size_t neuronCount;
-    ActivationFunction activationFunction;
-} Layer;
-
-
-
-/**
-
-Represents an epoch.
-
-loss - loss value of the network in the epoch
-accuracy - accuracy of the network in the epoch
-
-
-**/
-typedef struct Epoch{
-    float loss;
-    float accuracy;
-} Epoch;
-
-typedef struct Dataset{
-    size_t row;
-    size_t col;
-    size_t targetCol;
-    float* input;
-    float* target;
-} Dataset;
-
-
-/**
-
-Represents a weight matrix connecting a layer to another.
-
-rowCount - number of neurons in the previous layer
-colCount - number of neurons in the current layer
-weightMatrix - actual matrix of weight values represented in a 1D matrix through indexing
- 
-**/
-typedef struct WeightMatrix{
-    size_t rowCount;
-    size_t colCount;
-    float* weightMatrix;
-} WeightMatrix;
+#include"enum_loss_function_def.h"
+#include"enum_activation_function_def.h"
+#include"layer_def.h"
+#include"epoch_def.h"
+#include"weight_matrix_def.h"
+#include"dataset_def.h"
 
 
 /**
@@ -111,7 +31,7 @@ typedef struct NeuralNetwork{
     size_t layerCapacityCount;
     size_t epochCount;
     float learningRate;
-    LossFunction lossFunction;
+    ENUM_LOSS_FUNCTION lossFunction;
     Epoch* history;
 } NeuralNetwork;
 
@@ -124,7 +44,7 @@ Creates a new neural network and initializes the input layer.
 @return Pointer of type NeuralNetwork to the newly allocated neural network.
  
 **/
-NeuralNetwork* initialize(size_t neuronCount, LossFunction lossFunction);
+NeuralNetwork* initialize(size_t neuronCount, ENUM_LOSS_FUNCTION lossFunction);
 
 /**
 
@@ -139,7 +59,7 @@ connecting the previous layer to the new layer.
 @return Pointer to the neural network.
 
 **/
-NeuralNetwork* addLayer(NeuralNetwork* neuralNetwork, size_t neuronCount, ActivationFunction activationFunction);
+NeuralNetwork* addLayer(NeuralNetwork* neuralNetwork, size_t neuronCount, ENUM_ACTIVATION_FUNCTION activationFunction);
 
 
 /**
@@ -202,3 +122,6 @@ Creates a dataset
 
 **/
 Dataset* createDataset(size_t row, size_t col, size_t targetCol, float input[row][col], float target[row][targetCol]);
+
+
+#endif

@@ -85,20 +85,9 @@ nn = train(nn,dataset,676767,0.005f);
 
 ## Building
 
-Using Clang:
+The Makefile uses clang as the compiler, simply type this to run the program:
 
 ```bash
-clang main.c neuralnetwork.c -o main -lm
+make all
 ```
 
-Using GCC:
-
-```bash
-gcc main.c neuralnetwork.c -o main -lm
-```
-Take note: the -lm is important because it uses the math library libm
-Run:
-
-```bash
-./main
-```

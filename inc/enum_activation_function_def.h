@@ -1,0 +1,11 @@
+#ifndef _ENUM_ACTIVATION_FUNCTION_H_
+#define _ENUM_ACTIVATION_FUNCTION_H_
+
+typedef enum { 
+    RELU,
+    SIGMOID,
+    TANH,
+    NONE
+} ENUM_ACTIVATION_FUNCTION;
+
+#endif
