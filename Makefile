@@ -2,7 +2,8 @@ CC = clang
 CFLAGS = -Wall -Wextra -std=c99 -Iinc
 
 TARGET = bin/neural_network
-SRC = src/main.c src/neuralnetwork.c src/loss_handler.c
+SRC = src/main.c src/neuralnetwork.c src/loss_handler.c src/mse_handler.c \
+	src/bce_handler.c
 OBJ = $(SRC:src/%.c=bin/%.o)
 LINK = -lm
 

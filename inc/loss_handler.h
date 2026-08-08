@@ -1,6 +1,7 @@
 #ifndef _LOSS_HANDLER_H_
 #define _LOSS_HANDLER_H_
 
+#include<stddef.h>
 #include"enum_loss_function_def.h"
 #include"neural_network.h"
 #include"defines.h"
